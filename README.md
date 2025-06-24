@@ -6,7 +6,6 @@ After analysis, it generates a downloadable PDF report with findings and suggest
 🚀 Features
 
 - Upload JSON or CSV recipe files  
-- Choose entry limit and OpenAI model (<code>gpt-4o</code> or <code>gpt-3.5-turbo</code>)  
 - Analyze structure, completeness, and formatting  
 - Get a downloadable PDF audit report  
 
