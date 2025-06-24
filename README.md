@@ -1,53 +1,29 @@
-# 🧠 Portfolio Demonstration: Healthcare Data Quality Audit with OpenAI
+# 🧪 OpenAI Healthcare Recipe Quality Validator
 
-This repository demonstrates how to use OpenAI's GPT-4o model from Python to perform intelligent validation and summarization of structured healthcare data.
-
-Built as a showcase project for **AI Cloud Consulting** (operated by Razum GmbH), this notebook simulates how large language models can assist with **data quality audits** in regulated healthcare environments.
-
----
-
-## ✅ What It Does
-
-- Connects to the OpenAI API using Python
-- Submits structured healthcare-like records as prompts
-- Evaluates entries for completeness, formatting, and semantic alignment
-- Provides contextual explanations and audit summaries
-- Suggests improvements or flags issues for human review
-
----
-
-## ⚙️ Tech Stack
-
-- Python 3.13
-- JupyterLab
-- OpenAI GPT-4o API
-- Pandas (for tabular formatting)
-- Pydantic (for data schema validation)
-
----
-
-## 🏥 Use Case Context
-
-This project reflects common challenges in **GxP-compliant healthcare manufacturing** environments, including:
-
-- Consistency of documentation in recipe and batch records
-- Intelligent suggestions for missing values
-- Generative summaries for audit trails or review
-
----
-
-## 🔒 Disclaimer
-
-> This is a **portfolio demonstration project** built with **mock data only**.  
-> It is not affiliated with any employer, client, or real production system.  
+> ⚠️ This is a **portfolio demonstration project** built with **mock data only**.  
+> It is not affiliated with any employer, client, or production system.  
 > No confidential or proprietary information is included.
 
+This Streamlit app audits healthcare manufacturing recipes using OpenAI GPT-4o.  
+After analysis, it generates a downloadable PDF report with findings and suggestions.
+
 ---
 
-## 📌 About
+## 🚀 Features
 
-**Author:** [Igor Razumny](https://www.linkedin.com/in/irazum)  
-**Consulting Brand:** [AI Cloud Consulting](https://aicloudconsulting.com) (Razum GmbH)  
-**GitHub:** [github.com/igorrazumny](https://github.com/igorrazumny)
+- Upload JSON or CSV recipe files
+- Choose entry limit and OpenAI model (`gpt-4o` or `gpt-3.5-turbo`)
+- Analyze structure, completeness, and formatting
+- Get a downloadable PDF audit report
 
-Explore more AI-in-healthcare demos on the [GitHub profile](https://github.com/igorrazumny).
+---
+
+## ⚙️ Setup
+
+```bash
+git clone https://github.com/your-username/openai-recipe-quality-validator.git
+cd openai-recipe-quality-validator
+python3 -m venv venv && source venv/bin/activate
+pip install -r requirements.txt --break-system-packages
+echo "OPENAI_API_KEY=sk-..." > .env
+streamlit run src/app.py
