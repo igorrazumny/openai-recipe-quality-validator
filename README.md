@@ -23,3 +23,8 @@ python3 -m venv venv && source venv/bin/activate
 pip install -r requirements.txt --break-system-packages
 echo "OPENAI_API_KEY=sk-..." > .env
 streamlit run src/app.py
+```
+
+> ⚠️ This is a **portfolio demonstration project** built with **mock data only**.  
+> It is not affiliated with any employer, client, or production system.  
+> No confidential or proprietary information is included.
