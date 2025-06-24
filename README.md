@@ -1,4 +1,4 @@
-<h2>🧪 OpenAI Healthcare Recipe Quality Validator</h2>
+<b style="font-size:3em">🧪 OpenAI Healthcare Recipe Quality Validator</b>
 
 This Streamlit app audits healthcare manufacturing recipes using OpenAI GPT-4o.  
 After analysis, it generates a downloadable PDF report with findings and suggestions.
