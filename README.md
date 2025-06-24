@@ -3,14 +3,14 @@
 This Streamlit app audits healthcare manufacturing recipes using OpenAI GPT-4o.  
 After analysis, it generates a downloadable PDF report with findings and suggestions.
 
-<h3>🚀 Features</h3>
+🚀 Features
 
 - Upload JSON or CSV recipe files  
 - Choose entry limit and OpenAI model (<code>gpt-4o</code> or <code>gpt-3.5-turbo</code>)  
 - Analyze structure, completeness, and formatting  
 - Get a downloadable PDF audit report  
 
-<h3>⚙️ Setup</h3>
+⚙️ Setup
 
 <pre>
 git clone https://github.com/your-username/openai-recipe-quality-validator.git
