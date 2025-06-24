@@ -10,8 +10,8 @@ from src.pdf_generator import generate_audit_report
 from src.utils import estimate_cost, extract_file_metadata
 import pandas as pd
 import io
-import logging
 
+import logging
 logging.basicConfig(level=logging.INFO)
 
 def run_audit(content_str, file_type, entry_limit, model, file_name):
@@ -51,20 +51,23 @@ def run_audit(content_str, file_type, entry_limit, model, file_name):
 
 
         # Step 4: Generate audit report PDF
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S %Z")
         pdf_file_path = generate_audit_report(
             report_text,
             file_name,
             data
         )
 
+        # Create a custom filename for the PDF
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S %Z")
+        safe_file_name = file_name.replace(" ", "_").replace(".json", "").replace(".csv", "")
+        custom_filename = f"{timestamp}_{safe_file_name}_audit_report.pdf"
 
         # Step 5: Provide download link
         st.success("✅ Audit complete!")
         st.download_button(
             label="📄 Download Audit Report (PDF)",
             data=pdf_file_path,
-            file_name=f"{datetime.now().strftime("%Y-%m-%d")}_recipe_audit_report.pdf",
+            file_name=custom_filename,
             mime="application/pdf"
         )
 
