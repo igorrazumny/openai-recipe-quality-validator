@@ -7,15 +7,52 @@ import json
 import streamlit as st
 from src.audit import analyze_recipe
 from src.pdf_generator import generate_audit_report
-from src.utils import estimate_cost, extract_file_metadata
+from src.utils import estimate_cost
 import pandas as pd
 import io
 import pytz
+from collections import Counter
 
 import logging
 logging.basicConfig(level=logging.INFO)
 
-def run_audit(content_str, file_type, entry_limit, model, file_name, prompt):
+severity_mapping = {
+    # Critical issues
+    "Missing Required Step": "Critical",
+    "Grossly Incorrect Quantity": "Critical",
+    "Conflicting Status Code": "Critical",
+    "Negative Quantity": "Critical",
+    "Data Conflict": "Critical",
+    "Invalid Status": "Critical",
+    "Step Contradicts Approved Recipe": "Critical",
+    "Potential Falsification": "Critical",
+    "Timestamp Sequence Error": "Critical",
+    "Missing Mandatory Field": "Critical",
+    # Moderate issues
+    "Slightly Out of Range Quantity": "Moderate",
+    "Incomplete Operator Name": "Moderate",
+    "Non-Standard Timestamp": "Moderate",
+    "Duplicate Record": "Moderate",
+    "Use of Deprecated Process Code": "Moderate",
+    "Inconsistent Sequencing": "Moderate",
+    "Missing Recommended Field": "Moderate",
+    "Format Error": "Moderate",
+    "Value Out of Range": "Moderate",
+    "Invalid Date Format": "Moderate",
+    "Partial Data Entry": "Moderate",
+    "Data Inconsistency": "Moderate",
+    # Minor issues
+    "Minor Formatting Error": "Minor",
+    "Non-Critical Typo": "Minor",
+    "Slight Naming Deviation": "Minor",
+    "Extra Spaces": "Minor",
+    "Alternative Terminology": "Minor",
+    "Timestamps Missing Seconds": "Minor",
+    "Inconsistent Casing": "Minor"
+}
+
+
+def run_audit(content_str, file_type, entry_limit, model, file_name, system_prompt, user_prompt):
     try:
         # Step 1: Parse file content into a list of records
         if file_type == "json":
@@ -43,15 +80,71 @@ def run_audit(content_str, file_type, entry_limit, model, file_name, prompt):
 
         # Step 3: Perform analysis
         with st.spinner("Running audit with OpenAI..."):
-            report_text = analyze_recipe(data, model, prompt)
+            result_json = analyze_recipe(data, model, system_prompt, user_prompt)
+            records = result_json.get("records", [])
 
-    
+        # Re-apply severity mapping for consistency
+        for rec in records:
+            deviations = rec.get("deviations", [])
+            for dev in deviations:
+                dev_type = dev.get("type", "").strip()
+                if dev_type in severity_mapping:
+                    dev["severity"] = severity_mapping[dev_type]
+
+        # Compute compliance summary
+        total_records = len(records)
+        critical = 0
+        moderate = 0
+        minor = 0
+
+        critical_types = Counter()
+        moderate_types = Counter()
+
+        records_with_deviations = 0
+        records_with_multiple_deviations = 0
+
+        for rec in records:
+            deviations = rec.get("deviations", [])
+            if deviations:
+                records_with_deviations += 1
+                if len(deviations) > 1:
+                    records_with_multiple_deviations += 1
+                for dev in deviations:
+                    severity = dev.get("severity", "").lower()
+                    dev_type = dev.get("type", "Unknown")
+                    if severity == "critical":
+                        critical += 1
+                        critical_types[dev_type] += 1
+                    elif severity == "moderate":
+                        moderate += 1
+                        moderate_types[dev_type] += 1
+                    elif severity == "minor":
+                        minor += 1
+
+        records_fully_compliant = total_records - records_with_deviations
+        compliance_rate = round((records_fully_compliant / total_records) * 100, 1)
+
+        summary_stats = {
+            "data_quality_score": result_json.get("data_quality_score", 5),
+            "total_records": total_records,
+            "total_entries_in_file": total_entries,
+            "records_with_deviations": records_with_deviations,
+            "records_with_multiple_deviations": records_with_multiple_deviations,
+            "records_fully_compliant": records_fully_compliant,
+            "compliance_rate": compliance_rate,
+            "critical": critical,
+            "moderate": moderate,
+            "minor": minor,
+            "critical_types": dict(critical_types),
+            "moderate_types": dict(moderate_types)
+        }
 
         # Step 4: Generate audit report PDF
         pdf_content = generate_audit_report(
-            report_text,
-            file_name,
-            data
+            audit_results=result_json,  # ✅ Pass the full JSON including summary_text
+            original_filename=file_name,
+            file_contents=data,
+            summary_stats=summary_stats
         )
 
         # Create a custom filename for the PDF
@@ -61,16 +154,7 @@ def run_audit(content_str, file_type, entry_limit, model, file_name, prompt):
 
         # Step 5: Provide download link
         st.success("✅ Audit complete!")
-        
-        # logging.info(f"pdf_content = {pdf_content} (type: {type(pdf_content)})")
-        
-        # with open(pdf_content, "rb") as f:
-        #     pdf_bytes = f.read()
 
-        # Debugging
-        logging.info("\n" * 10)
-        logging.info("Here")
-            
         st.download_button(
             label="📄 Download Audit Report (PDF)",
             data=pdf_content,

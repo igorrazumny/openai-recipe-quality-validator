@@ -31,7 +31,7 @@ logging.info(f"{now} New audit execution started")
 # Set Streamlit page config
 st.set_page_config(
     page_title="Healthcare Recipe Quality Validator",
-    layout="centered",
+    layout="wide",
     page_icon="🧪",
 )
 
@@ -39,7 +39,7 @@ st.set_page_config(
 render_layout()
 
 # Show controls and get user input
-uploaded_file, num_entries, model, prompt = display_controls()
+uploaded_file, num_entries, model, system_prompt, user_prompt = display_controls()
 
 # logging.info(f"Number of entries: {num_entries}, Model: {model}")
 
@@ -74,7 +74,8 @@ if uploaded_file and num_entries and model:
             entry_limit=num_entries,
             model=model,
             file_name=uploaded_file.name, 
-            prompt=prompt
+            system_prompt=system_prompt,
+            user_prompt=user_prompt
         )
 
     except Exception as e:
