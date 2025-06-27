@@ -39,9 +39,9 @@ st.set_page_config(
 render_layout()
 
 # Show controls and get user input
-uploaded_file, num_entries, model = display_controls()
+uploaded_file, num_entries, model, prompt = display_controls()
 
-logging.info(f"Number of entries: {num_entries}, Model: {model}")
+# logging.info(f"Number of entries: {num_entries}, Model: {model}")
 
 # If everything is provided, start processing
 if uploaded_file and num_entries and model:
@@ -51,11 +51,21 @@ if uploaded_file and num_entries and model:
 
         logging.info(f"File type: {file_type}")
 
-        # Read uploaded file as string
         content_bytes = uploaded_file.read()
-        logging.info(f"File type: {uploaded_file.name}")
+        uploaded_file.seek(0)
 
-        content_str = content_bytes.decode("utf-8")
+        # ✅ NEW: Check for null bytes (binary file protection)
+        if b'\x00' in content_bytes:
+            st.error("❌ The uploaded file contains binary data or embedded null bytes. Please upload a clean UTF-8 text file.")
+            st.stop()  # Exit gracefully
+
+        # ✅ NEW: Try decoding safely
+        try:
+            content_str = content_bytes.decode("utf-8")
+        except UnicodeDecodeError as e:
+            logging.error(f"Unicode decode error: {e}")
+            st.error("❌ The uploaded file is not valid UTF-8 text. Please re-save it as UTF-8 encoding and try again.")
+            st.stop()  # Exit gracefully
 
         # Run audit
         run_audit(
@@ -63,7 +73,8 @@ if uploaded_file and num_entries and model:
             file_type=file_type,
             entry_limit=num_entries,
             model=model,
-            file_name=uploaded_file.name
+            file_name=uploaded_file.name, 
+            prompt=prompt
         )
 
     except Exception as e:

@@ -15,9 +15,9 @@ def generate_audit_report(audit_results: str, original_filename: str, file_conte
     """
     timestamp = datetime.now(pytz.timezone("Europe/Zurich")).strftime("%Y-%m-%d %H:%M:%S %Z")
 
-    # Debugging
-    logging.info("\n" * 10)
-    logging.info(f"Timestamp {timestamp}")
+    # # Debugging
+    # logging.info("\n" * 10)
+    # logging.info(f"Timestamp {timestamp}")
    
 
     pdf = FPDF()

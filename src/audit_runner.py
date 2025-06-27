@@ -10,11 +10,12 @@ from src.pdf_generator import generate_audit_report
 from src.utils import estimate_cost, extract_file_metadata
 import pandas as pd
 import io
+import pytz
 
 import logging
 logging.basicConfig(level=logging.INFO)
 
-def run_audit(content_str, file_type, entry_limit, model, file_name):
+def run_audit(content_str, file_type, entry_limit, model, file_name, prompt):
     try:
         # Step 1: Parse file content into a list of records
         if file_type == "json":
@@ -37,36 +38,42 @@ def run_audit(content_str, file_type, entry_limit, model, file_name):
                 st.warning("Audit canceled.")
                 return
         else:
-            data = data[:int(entry_limit)]
+            entry_count = int(str(entry_limit).split(" ")[0])
+            data = data[:entry_count]
 
         # Step 3: Perform analysis
         with st.spinner("Running audit with OpenAI..."):
-            report_text = analyze_recipe(data, model)
+            report_text = analyze_recipe(data, model, prompt)
 
-        # Debugging
-        logging.info("\n" * 10)
-        lines = report_text.splitlines()
-        preview = "\n".join(lines[:5])
-        logging.info(f"Report text preview in audit_runner.py:\n{preview}")
-
+    
 
         # Step 4: Generate audit report PDF
-        pdf_file_path = generate_audit_report(
+        pdf_content = generate_audit_report(
             report_text,
             file_name,
             data
         )
 
         # Create a custom filename for the PDF
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S %Z")
+        timestamp = datetime.now(pytz.timezone("Europe/Zurich")).strftime("%Y-%m-%d %H:%M:%S %Z")
         safe_file_name = file_name.replace(" ", "_").replace(".json", "").replace(".csv", "")
         custom_filename = f"{timestamp}_{safe_file_name}_audit_report.pdf"
 
         # Step 5: Provide download link
         st.success("✅ Audit complete!")
+        
+        # logging.info(f"pdf_content = {pdf_content} (type: {type(pdf_content)})")
+        
+        # with open(pdf_content, "rb") as f:
+        #     pdf_bytes = f.read()
+
+        # Debugging
+        logging.info("\n" * 10)
+        logging.info("Here")
+            
         st.download_button(
             label="📄 Download Audit Report (PDF)",
-            data=pdf_file_path,
+            data=pdf_content,
             file_name=custom_filename,
             mime="application/pdf"
         )
