@@ -5,19 +5,22 @@
 import os
 import json
 import re
-from openai import OpenAI 
+from pyexpat.errors import messages
+from typing import Any
+
+from openai import OpenAI
 from dotenv import load_dotenv
 import logging
-
-logging.basicConfig(level=logging.INFO)
+import config
+# logging.basicConfig(level=logging.INFO)
 
 load_dotenv()
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+client = OpenAI(api_key=config.OPENAI_API_KEY)
 
 def analyze_recipe(recipe_entries, model="gpt-4o", system_prompt="", user_prompt=""):
-    logging.info(f"Prompt: {system_prompt}")
-    logging.info(f"Prompt: {user_prompt}")
+    # logging.info(f"Prompt: {system_prompt}")
+    # logging.info(f"Prompt: {user_prompt}")
 
     MAX_ENTRIES = 1000
 
@@ -34,12 +37,14 @@ def analyze_recipe(recipe_entries, model="gpt-4o", system_prompt="", user_prompt
         f"{json.dumps(truncated, indent=2, sort_keys=True)}"
     )
 
+    messages: list[dict[str, Any]] = [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": full_prompt}
+    ]
+
     response = client.chat.completions.create(
         model=model,
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": full_prompt}
-        ],
+        messages=messages, # type: ignore[arg-type]
         temperature=0,
         top_p=1
     )

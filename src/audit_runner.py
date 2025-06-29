@@ -14,7 +14,7 @@ import pytz
 from collections import Counter
 
 import logging
-logging.basicConfig(level=logging.INFO)
+# logging.basicConfig(level=logging.INFO)
 
 severity_mapping = {
     # Critical issues
@@ -153,14 +153,17 @@ def run_audit(content_str, file_type, entry_limit, model, file_name, system_prom
         custom_filename = f"{timestamp}_{safe_file_name}_audit_report.pdf"
 
         # Step 5: Provide download link
-        st.success("✅ Audit complete!")
+        # st.success("✅ Audit complete!")
 
-        st.download_button(
-            label="📄 Download Audit Report (PDF)",
-            data=pdf_content,
-            file_name=custom_filename,
-            mime="application/pdf"
-        )
+        # Step 5: Return everything instead of displaying
+        return {
+            "pdf_content": pdf_content,
+            "custom_filename": custom_filename,
+            "summary_stats": summary_stats
+        }
+
+
 
     except Exception as e:
-        st.error(f"❌ An error occurred: {str(e)}")
+        logging.error(f"❌ An error occurred in run_audit: {e}")
+        raise
